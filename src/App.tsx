@@ -141,8 +141,6 @@ const App: React.FC = () => {
       </Grid>
       <MenuWrapper>
         <MenuItem>Generations: {gen}</MenuItem>
-        <MenuItem onClick={handleStartStop}>Start / Stop / Resume</MenuItem>
-        <MenuItem onClick={handleRestart}>Restart</MenuItem>
         <MenuItem>
           Interval:{' '}
           <input
@@ -155,6 +153,8 @@ const App: React.FC = () => {
           />
           {interval}ms
         </MenuItem>
+        <MenuItem onClick={handleStartStop}>Start / Stop / Resume</MenuItem>
+        <MenuItem onClick={handleRestart}>Restart</MenuItem>
       </MenuWrapper>
     </Wrapper>
   );
