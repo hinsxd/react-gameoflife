@@ -1,34 +1,31 @@
-import React, { useReducer, Reducer, useEffect } from 'react';
-import styled, { css } from 'styled-components';
+import React, { useReducer, Reducer, useState } from 'react';
+import styled from 'styled-components';
+import { Button } from 'rebass';
 import produce from 'immer';
 import useInterval from './useInterval';
 type AppState = {
   board: boolean[][];
   gen: number;
   growing: boolean;
-  pendingGrow: { i: number; j: number } | null;
+  cols: number;
+  rows: number;
+  aliveProp: number;
 };
 type Action =
   | { type: 'GROW' }
   | { type: 'START' }
   | { type: 'STOP' }
-  | { type: 'PRESS'; payload: { i: number; j: number } };
+  | { type: 'PRESS'; payload: { i: number; j: number } }
+  | { type: 'RESTART' };
 
 const AppReducer: Reducer<AppState, Action> = (state, action) => {
   return produce(state, draft => {
     switch (action.type) {
       case 'GROW':
         draft.gen++;
-        if (state.pendingGrow) {
-          const { i, j } = state.pendingGrow;
-          draft.board[i][j] = true;
-          draft.pendingGrow = null;
-        }
         const { board } = state;
-        for (let i = 0; i < board.length; i++) {
-          const row = board[i];
-          for (let j = 0; j < row.length; j++) {
-            const cell = board[i][j];
+        board.forEach((row, i) => {
+          row.forEach((cell, j) => {
             let count = 0;
             const dir = [-1, 0, 1];
             dir.forEach(dirX =>
@@ -52,11 +49,16 @@ const AppReducer: Reducer<AppState, Action> = (state, action) => {
             if (cell === true && (count >= 4 || count <= 1)) {
               draft.board[i][j] = false;
             }
-          }
+          });
+        });
+        for (let i = 0; i < board.length; i++) {
+          const row = board[i];
+          for (let j = 0; j < row.length; j++) {}
         }
         break;
       case 'PRESS':
-        draft.pendingGrow = action.payload;
+        const { i, j } = action.payload;
+        draft.board[i][j] = !draft.board[i][j];
         break;
       case 'START':
         draft.growing = true;
@@ -64,54 +66,72 @@ const AppReducer: Reducer<AppState, Action> = (state, action) => {
       case 'STOP':
         draft.growing = false;
         break;
+      case 'RESTART':
+        const { rows, cols, aliveProp } = state;
+        draft.board = generateBoard(rows, cols, aliveProp);
+        draft.growing = false;
+        draft.gen = 0;
     }
   });
 };
 
+const generateBoard = (
+  rows: number,
+  cols: number,
+  aliveProp: number = 0.5
+): AppState['board'] => {
+  return [...new Array(rows)].map(() =>
+    new Array(cols).fill(false).map(() => Math.random() > aliveProp)
+  );
+};
 const initializer = ({
   cols,
-  rows
+  rows,
+  aliveProp = 0.5
 }: {
   cols: number;
   rows: number;
+  aliveProp?: number;
 }): AppState => {
-  const board = [...Array(rows)].map(x => Array(cols).fill(false));
-  for (let i = 0; i < rows; i++) {
-    for (let j = 0; j < cols; j++) {
-      board[i][j] = Math.random() > 0.5;
-    }
-  }
   return {
-    board,
+    board: generateBoard(rows, cols, aliveProp),
     gen: 0,
     growing: false,
-    pendingGrow: null
+    cols,
+    rows,
+    aliveProp
   };
 };
 const App: React.FC = () => {
   const [{ board, gen, growing }, dispatch] = useReducer(
     AppReducer,
-    { cols: 50, rows: 30 },
+    { cols: 60, rows: 40 },
     initializer
   );
+  const [interval, setInterval] = useState(100);
 
   useInterval(
     () => {
       dispatch({ type: 'GROW' });
     },
-    growing ? 150 : null
+    growing ? interval : null
   );
 
   const handleStart = () => dispatch({ type: 'START' });
   const handleStop = () => dispatch({ type: 'STOP' });
-  const handleClick = (i: number, j: number) => () =>
+  const handleClick = (i: number, j: number) => () => {
     dispatch({ type: 'PRESS', payload: { i, j } });
+  };
+  const handleRestart = () => {
+    console.log('restart');
+    dispatch({ type: 'RESTART' });
+  };
+
+  const handleIntervalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setInterval(+e.target.value);
+  };
   return (
     <Wrapper>
-      <div style={{ color: '#fff', fontSize: 50 }}>
-        {gen} <button onClick={handleStart}>Start</button>
-        <button onClick={handleStop}>Stop</button>
-      </div>
       <Grid>
         {board.map((row, i) => (
           <Row key={`row-${i}`}>
@@ -130,6 +150,28 @@ const App: React.FC = () => {
           </Row>
         ))}
       </Grid>
+      <div>
+        <div>
+          <span style={{ color: '#fff', fontSize: 50 }}>{gen}</span>
+        </div>
+        <div>
+          <Button onClick={handleStart}>Start</Button>
+          <Button onClick={handleStop}>Stop</Button>
+          <Button onClick={handleRestart}>Restart</Button>
+          <span style={{ color: '#fff', fontSize: 20 }}>
+            Generation interval:{' '}
+            <input
+              type="range"
+              min="20"
+              max="1000"
+              step="10"
+              value={interval}
+              onChange={handleIntervalChange}
+            />
+            {interval}ms
+          </span>
+        </div>
+      </div>
     </Wrapper>
   );
 };
@@ -138,25 +180,18 @@ const Wrapper = styled.div`
   width: 100vw;
   height: 100vh;
   background: #000;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 `;
 const Grid = styled.div`
   display: flex;
   flex-direction: column;
 `;
 const Row = styled.div`
-  flex: 0;
   display: flex;
   flex-direction: row;
+  justify-content: center;
 `;
-// const Cell = styled.div<{ alive?: boolean }>`
-//   flex: 0 0 10px;
-//   height: 10px;
-//   border: 1px solid #222;
-//   ${p =>
-//     p.alive &&
-//     css`
-
-//     `}
-// `;
 
 export default App;
