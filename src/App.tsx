@@ -8,7 +8,7 @@ type AppState = {
   growing: boolean;
   cols: number;
   rows: number;
-  aliveProp: number;
+  aliveProb: number;
 };
 type Action =
   | { type: 'GROW' }
@@ -62,8 +62,8 @@ const AppReducer: Reducer<AppState, Action> = (state, action) => {
         draft.growing = !draft.growing;
         break;
       case 'RESTART':
-        const { rows, cols, aliveProp } = state;
-        draft.board = generateBoard(rows, cols, aliveProp);
+        const { rows, cols, aliveProb } = state;
+        draft.board = generateBoard(rows, cols, aliveProb);
         draft.growing = false;
         draft.gen = 0;
     }
@@ -73,28 +73,28 @@ const AppReducer: Reducer<AppState, Action> = (state, action) => {
 const generateBoard = (
   rows: number,
   cols: number,
-  aliveProp: number = 0.5
+  aliveProb: number = 0.5
 ): AppState['board'] => {
   return [...new Array(rows)].map(() =>
-    new Array(cols).fill(false).map(() => Math.random() > aliveProp)
+    new Array(cols).fill(false).map(() => Math.random() > aliveProb)
   );
 };
 const initializer = ({
   cols,
   rows,
-  aliveProp = 0.5
+  aliveProb = 0.5
 }: {
   cols: number;
   rows: number;
-  aliveProp?: number;
+  aliveProb?: number;
 }): AppState => {
   return {
-    board: generateBoard(rows, cols, aliveProp),
+    board: generateBoard(rows, cols, aliveProb),
     gen: 0,
     growing: false,
     cols,
     rows,
-    aliveProp
+    aliveProb
   };
 };
 const App: React.FC = () => {
