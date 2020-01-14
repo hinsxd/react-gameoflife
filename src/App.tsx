@@ -1,6 +1,5 @@
 import React, { useReducer, Reducer, useState } from 'react';
 import styled from 'styled-components';
-import { Button } from 'rebass';
 import produce from 'immer';
 import useInterval from './useInterval';
 type AppState = {
@@ -150,28 +149,24 @@ const App: React.FC = () => {
           </Row>
         ))}
       </Grid>
-      <div>
-        <div>
-          <span style={{ color: '#fff', fontSize: 50 }}>{gen}</span>
-        </div>
-        <div>
-          <Button onClick={handleStart}>Start</Button>
-          <Button onClick={handleStop}>Stop</Button>
-          <Button onClick={handleRestart}>Restart</Button>
-          <span style={{ color: '#fff', fontSize: 20 }}>
-            Generation interval:{' '}
-            <input
-              type="range"
-              min="20"
-              max="1000"
-              step="10"
-              value={interval}
-              onChange={handleIntervalChange}
-            />
-            {interval}ms
-          </span>
-        </div>
-      </div>
+      <MenuWrapper>
+        <MenuItem onClick={handleStart}>Generations: {gen}</MenuItem>
+        <MenuItem onClick={handleStart}>Start</MenuItem>
+        <MenuItem onClick={handleStop}>Stop</MenuItem>
+        <MenuItem onClick={handleRestart}>Restart</MenuItem>
+        <MenuItem>
+          Interval:{' '}
+          <input
+            type="range"
+            min="20"
+            max="1000"
+            step="10"
+            value={interval}
+            onChange={handleIntervalChange}
+          />
+          {interval}ms
+        </MenuItem>
+      </MenuWrapper>
     </Wrapper>
   );
 };
@@ -192,6 +187,20 @@ const Row = styled.div`
   display: flex;
   flex-direction: row;
   justify-content: center;
+`;
+const MenuWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+const MenuItem = styled.div`
+  flex: 0;
+  width: 300px;
+  padding: 10px;
+  margin: 3px;
+  background: rgb(102, 255, 51);
+  color: black;
+  text-align: center;
 `;
 
 export default App;
