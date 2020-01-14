@@ -14,7 +14,8 @@ type Action =
   | { type: 'GROW' }
   | { type: 'START_STOP' }
   | { type: 'PRESS'; payload: { i: number; j: number } }
-  | { type: 'RESTART' };
+  | { type: 'RESTART' }
+  | { type: 'ADJUST_PROB'; payload: { aliveProb: number } };
 
 const AppReducer: Reducer<AppState, Action> = (state, action) => {
   return produce(state, draft => {
@@ -66,6 +67,9 @@ const AppReducer: Reducer<AppState, Action> = (state, action) => {
         draft.board = generateBoard(rows, cols, aliveProb);
         draft.growing = false;
         draft.gen = 0;
+        break;
+      case 'ADJUST_PROB':
+        draft.aliveProb = action.payload.aliveProb;
     }
   });
 };
@@ -76,7 +80,7 @@ const generateBoard = (
   aliveProb: number = 0.5
 ): AppState['board'] => {
   return [...new Array(rows)].map(() =>
-    new Array(cols).fill(false).map(() => Math.random() > aliveProb)
+    new Array(cols).fill(false).map(() => Math.random() < aliveProb)
   );
 };
 const initializer = ({
@@ -98,7 +102,7 @@ const initializer = ({
   };
 };
 const App: React.FC = () => {
-  const [{ board, gen, growing }, dispatch] = useReducer(
+  const [{ board, gen, growing, aliveProb }, dispatch] = useReducer(
     AppReducer,
     { cols: 60, rows: 40 },
     initializer
@@ -123,6 +127,9 @@ const App: React.FC = () => {
 
   const handleIntervalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInterval(+e.target.value);
+  };
+  const handleAliveProbChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type: 'ADJUST_PROB', payload: { aliveProb: +e.target.value } });
   };
   return (
     <Wrapper>
@@ -155,6 +162,18 @@ const App: React.FC = () => {
         </MenuItem>
         <MenuItem onClick={handleStartStop}>Start / Stop / Resume</MenuItem>
         <MenuItem onClick={handleRestart}>Restart</MenuItem>
+        <MenuItem>
+          Density:{' '}
+          <input
+            type="range"
+            min="0.1"
+            max="1"
+            step="0.1"
+            value={aliveProb}
+            onChange={handleAliveProbChange}
+          />
+          {(aliveProb * 100).toFixed(0)}%
+        </MenuItem>
       </MenuWrapper>
     </Wrapper>
   );
@@ -178,8 +197,8 @@ const Row = styled.div`
   justify-content: center;
 `;
 const Cell = styled.div<{ alive: boolean }>`
-  flex: 0 0 10px;
-  height: 10px;
+  flex: 0 0 9px;
+  height: 9px;
   border: 1px solid #353535;
   background: ${p => (p.alive ? `rgb(102, 255, 51)` : '#000')};
 `;
@@ -192,7 +211,7 @@ const MenuWrapper = styled.div`
 const MenuItem = styled.div`
   flex: 0;
   width: 300px;
-  padding: 10px;
+  padding: 8px;
   margin: 3px;
   background: rgb(102, 255, 51);
   color: black;
