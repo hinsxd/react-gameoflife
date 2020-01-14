@@ -12,8 +12,7 @@ type AppState = {
 };
 type Action =
   | { type: 'GROW' }
-  | { type: 'START' }
-  | { type: 'STOP' }
+  | { type: 'START_STOP' }
   | { type: 'PRESS'; payload: { i: number; j: number } }
   | { type: 'RESTART' };
 
@@ -59,11 +58,8 @@ const AppReducer: Reducer<AppState, Action> = (state, action) => {
         const { i, j } = action.payload;
         draft.board[i][j] = !draft.board[i][j];
         break;
-      case 'START':
-        draft.growing = true;
-        break;
-      case 'STOP':
-        draft.growing = false;
+      case 'START_STOP':
+        draft.growing = !draft.growing;
         break;
       case 'RESTART':
         const { rows, cols, aliveProp } = state;
@@ -116,8 +112,7 @@ const App: React.FC = () => {
     growing ? interval : null
   );
 
-  const handleStart = () => dispatch({ type: 'START' });
-  const handleStop = () => dispatch({ type: 'STOP' });
+  const handleStartStop = () => dispatch({ type: 'START_STOP' });
   const handleClick = (i: number, j: number) => () => {
     dispatch({ type: 'PRESS', payload: { i, j } });
   };
@@ -135,13 +130,8 @@ const App: React.FC = () => {
         {board.map((row, i) => (
           <Row key={`row-${i}`}>
             {row.map((alive, j) => (
-              <div
-                style={{
-                  flex: '0 0 10px',
-                  height: '10px',
-                  border: '1px solid #222',
-                  background: alive ? `rgb(102, 255, 51)` : '#000'
-                }}
+              <Cell
+                alive={alive}
                 key={`cell-${j}`}
                 onClick={handleClick(i, j)}
               />
@@ -150,9 +140,8 @@ const App: React.FC = () => {
         ))}
       </Grid>
       <MenuWrapper>
-        <MenuItem onClick={handleStart}>Generations: {gen}</MenuItem>
-        <MenuItem onClick={handleStart}>Start</MenuItem>
-        <MenuItem onClick={handleStop}>Stop</MenuItem>
+        <MenuItem>Generations: {gen}</MenuItem>
+        <MenuItem onClick={handleStartStop}>Start / Stop / Resume</MenuItem>
         <MenuItem onClick={handleRestart}>Restart</MenuItem>
         <MenuItem>
           Interval:{' '}
@@ -188,7 +177,14 @@ const Row = styled.div`
   flex-direction: row;
   justify-content: center;
 `;
+const Cell = styled.div<{ alive: boolean }>`
+  flex: 0 0 10px;
+  height: 10px;
+  border: 1px solid #353535;
+  background: ${p => (p.alive ? `rgb(102, 255, 51)` : '#000')};
+`;
 const MenuWrapper = styled.div`
+  margin-top: 10px;
   display: flex;
   flex-direction: column;
   align-items: center;
