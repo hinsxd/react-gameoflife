@@ -1,106 +1,8 @@
-import React, { useReducer, Reducer, useState } from 'react';
-import styled from 'styled-components';
-import produce from 'immer';
-import useInterval from './useInterval';
-type AppState = {
-  board: boolean[][];
-  gen: number;
-  growing: boolean;
-  cols: number;
-  rows: number;
-  aliveProb: number;
-};
-type Action =
-  | { type: 'GROW' }
-  | { type: 'START_STOP' }
-  | { type: 'PRESS'; payload: { i: number; j: number } }
-  | { type: 'RESTART' }
-  | { type: 'ADJUST_PROB'; payload: { aliveProb: number } };
+import React, { useReducer, useState } from 'react';
+import { useInterval } from './hooks';
+import { AppReducer, initializer } from './reducer';
+import { Cell, Grid, MenuItem, MenuWrapper, Row, Wrapper } from './components';
 
-const AppReducer: Reducer<AppState, Action> = (state, action) => {
-  return produce(state, draft => {
-    switch (action.type) {
-      case 'GROW':
-        draft.gen++;
-        const { board } = state;
-        board.forEach((row, i) => {
-          row.forEach((cell, j) => {
-            let count = 0;
-            const dir = [-1, 0, 1];
-            dir.forEach(dirX =>
-              dir.forEach(dirY => {
-                if (
-                  !(dirX === 0 && dirY === 0) &&
-                  i + dirX >= 0 &&
-                  i + dirX < board.length &&
-                  j + dirY >= 0 &&
-                  j + dirY < row.length
-                ) {
-                  if (!!board[i + dirX][j + dirY]) {
-                    count++;
-                  }
-                }
-              })
-            );
-            if (cell === false && count === 3) {
-              draft.board[i][j] = true;
-            }
-            if (cell === true && (count >= 4 || count <= 1)) {
-              draft.board[i][j] = false;
-            }
-          });
-        });
-        for (let i = 0; i < board.length; i++) {
-          const row = board[i];
-          for (let j = 0; j < row.length; j++) {}
-        }
-        break;
-      case 'PRESS':
-        const { i, j } = action.payload;
-        draft.board[i][j] = !draft.board[i][j];
-        break;
-      case 'START_STOP':
-        draft.growing = !draft.growing;
-        break;
-      case 'RESTART':
-        const { rows, cols, aliveProb } = state;
-        draft.board = generateBoard(rows, cols, aliveProb);
-        draft.growing = false;
-        draft.gen = 0;
-        break;
-      case 'ADJUST_PROB':
-        draft.aliveProb = action.payload.aliveProb;
-    }
-  });
-};
-
-const generateBoard = (
-  rows: number,
-  cols: number,
-  aliveProb: number = 0.5
-): AppState['board'] => {
-  return [...new Array(rows)].map(() =>
-    new Array(cols).fill(false).map(() => Math.random() < aliveProb)
-  );
-};
-const initializer = ({
-  cols,
-  rows,
-  aliveProb = 0.5
-}: {
-  cols: number;
-  rows: number;
-  aliveProb?: number;
-}): AppState => {
-  return {
-    board: generateBoard(rows, cols, aliveProb),
-    gen: 0,
-    growing: false,
-    cols,
-    rows,
-    aliveProb
-  };
-};
 const App: React.FC = () => {
   const [{ board, gen, growing, aliveProb }, dispatch] = useReducer(
     AppReducer,
@@ -117,11 +19,15 @@ const App: React.FC = () => {
   );
 
   const handleStartStop = () => dispatch({ type: 'START_STOP' });
+
   const handleClick = (i: number, j: number) => () => {
-    dispatch({ type: 'PRESS', payload: { i, j } });
+    dispatch({
+      type: 'PRESS',
+      payload: { coord: { i, j } }
+    });
   };
+
   const handleRestart = () => {
-    console.log('restart');
     dispatch({ type: 'RESTART' });
   };
 
@@ -131,6 +37,7 @@ const App: React.FC = () => {
   const handleAliveProbChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     dispatch({ type: 'ADJUST_PROB', payload: { aliveProb: +e.target.value } });
   };
+
   return (
     <Wrapper>
       <Grid>
@@ -178,44 +85,5 @@ const App: React.FC = () => {
     </Wrapper>
   );
 };
-
-const Wrapper = styled.div`
-  width: 100vw;
-  height: 100vh;
-  background: #000;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-`;
-const Grid = styled.div`
-  display: flex;
-  flex-direction: column;
-`;
-const Row = styled.div`
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-`;
-const Cell = styled.div<{ alive: boolean }>`
-  flex: 0 0 9px;
-  height: 9px;
-  border: 1px solid #353535;
-  background: ${p => (p.alive ? `rgb(102, 255, 51)` : '#000')};
-`;
-const MenuWrapper = styled.div`
-  margin-top: 10px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-`;
-const MenuItem = styled.div`
-  flex: 0;
-  width: 300px;
-  padding: 8px;
-  margin: 3px;
-  background: rgb(102, 255, 51);
-  color: black;
-  text-align: center;
-`;
 
 export default App;
