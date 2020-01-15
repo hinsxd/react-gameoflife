@@ -53,15 +53,15 @@ export const AppReducer: Reducer<AppState, Action> = (state, action) => {
         break;
       }
       case 'RESTART': {
-        const { rows, cols, aliveProb } = state;
-        draft.board = generateBoard(rows, cols, aliveProb);
+        const { rows, cols, density } = state;
+        draft.board = generateBoard(rows, cols, density);
         draft.growing = false;
         draft.gen = 0;
 
         break;
       }
-      case 'ADJUST_PROB': {
-        draft.aliveProb = action.payload.aliveProb;
+      case 'ADJUST_DENSITY': {
+        draft.density = action.payload.density;
         break;
       }
       case 'HOLD_MOUSE': {
@@ -72,14 +72,6 @@ export const AppReducer: Reducer<AppState, Action> = (state, action) => {
         draft.mousePressed = false;
         break;
       }
-      // case 'ENTER_CELL': {
-      //   draft.cellOnHover = action.payload.coord;
-      //   break;
-      // }
-      // case 'LEAVE_BOARD': {
-      //   draft.cellOnHover = null;
-      //   break;
-      // }
     }
   });
 };
@@ -87,19 +79,19 @@ export const AppReducer: Reducer<AppState, Action> = (state, action) => {
 export const initializer = ({
   cols,
   rows,
-  aliveProb = 0.5
+  density = 0.3
 }: {
   cols: number;
   rows: number;
-  aliveProb?: number;
+  density?: number;
 }): AppState => {
   return {
-    board: generateBoard(rows, cols, aliveProb),
+    board: generateBoard(rows, cols, density),
     gen: 0,
     growing: false,
     cols,
     rows,
-    aliveProb,
+    density,
     // cellOnHover: null,
     mousePressed: false
   };

@@ -4,10 +4,11 @@ import { AppReducer, initializer } from './reducer';
 import { Cell, Grid, MenuItem, MenuWrapper, Row, Wrapper } from './components';
 
 const App: React.FC = () => {
-  const [
-    { board, gen, growing, aliveProb, mousePressed },
-    dispatch
-  ] = useReducer(AppReducer, { cols: 60, rows: 40 }, initializer);
+  const [{ board, gen, growing, density, mousePressed }, dispatch] = useReducer(
+    AppReducer,
+    { cols: 60, rows: 40 },
+    initializer
+  );
 
   const [interval, setInterval] = useState(100);
 
@@ -34,8 +35,8 @@ const App: React.FC = () => {
   const handleIntervalChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInterval(+e.target.value);
   };
-  const handleAliveProbChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    dispatch({ type: 'ADJUST_PROB', payload: { aliveProb: +e.target.value } });
+  const handleDensityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    dispatch({ type: 'ADJUST_DENSITY', payload: { density: +e.target.value } });
   };
 
   const handleHoverCell = (i: number, j: number) => (
@@ -101,10 +102,10 @@ const App: React.FC = () => {
             min="0.1"
             max="1"
             step="0.1"
-            value={aliveProb}
-            onChange={handleAliveProbChange}
+            value={density}
+            onChange={handleDensityChange}
           />
-          {(aliveProb * 100).toFixed(0)}%
+          {(density * 100).toFixed(0)}%
         </MenuItem>
       </MenuWrapper>
     </Wrapper>

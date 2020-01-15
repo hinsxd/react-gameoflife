@@ -6,7 +6,7 @@ export type AppState = {
   growing: boolean;
   cols: number;
   rows: number;
-  aliveProb: number;
+  density: number;
   mousePressed: boolean;
 };
 
@@ -16,9 +16,7 @@ export type Action =
   | { type: 'CLICK_CELL'; payload: { coord: Coord } }
   | { type: 'PAINT_CELL'; payload: { coord: Coord } }
   | { type: 'RESTART' }
-  | { type: 'ADJUST_PROB'; payload: { aliveProb: number } }
+  | { type: 'ADJUST_DENSITY'; payload: { density: number } }
   | { type: 'HOLD_MOUSE' }
   | { type: 'RELEASE_MOUSE' }
-  | { type: 'RESTART' }
-  | { type: 'ENTER_CELL'; payload: { coord: Coord } }
   | { type: 'LEAVE_BOARD' };
