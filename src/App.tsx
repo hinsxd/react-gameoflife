@@ -4,11 +4,11 @@ import { AppReducer, initializer } from './reducer';
 import { Cell, Grid, MenuItem, MenuWrapper, Row, Wrapper } from './components';
 
 const App: React.FC = () => {
-  const [{ board, gen, growing, aliveProb }, dispatch] = useReducer(
-    AppReducer,
-    { cols: 60, rows: 40 },
-    initializer
-  );
+  const [
+    { board, gen, growing, aliveProb, mousePressed },
+    dispatch
+  ] = useReducer(AppReducer, { cols: 60, rows: 40 }, initializer);
+
   const [interval, setInterval] = useState(100);
 
   useInterval(
@@ -22,7 +22,7 @@ const App: React.FC = () => {
 
   const handleClick = (i: number, j: number) => () => {
     dispatch({
-      type: 'PRESS',
+      type: 'CLICK_CELL',
       payload: { coord: { i, j } }
     });
   };
@@ -38,16 +38,41 @@ const App: React.FC = () => {
     dispatch({ type: 'ADJUST_PROB', payload: { aliveProb: +e.target.value } });
   };
 
+  const handleHoverCell = (i: number, j: number) => (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>
+  ) => {
+    if (mousePressed) {
+      dispatch({
+        type: 'PAINT_CELL',
+        payload: { coord: { i, j } }
+      });
+    }
+  };
+
+  const handleMouseHold = () => {
+    dispatch({ type: 'HOLD_MOUSE' });
+  };
+  const handleMouseRelease = () => {
+    dispatch({ type: 'RELEASE_MOUSE' });
+  };
+  const handleMouseLeave = () => {
+    dispatch({ type: 'LEAVE_BOARD' });
+  };
   return (
     <Wrapper>
-      <Grid>
+      <Grid
+        onMouseDown={handleMouseHold}
+        onMouseUp={handleMouseRelease}
+        onMouseLeave={handleMouseLeave}
+      >
         {board.map((row, i) => (
           <Row key={`row-${i}`}>
             {row.map((alive, j) => (
               <Cell
                 alive={alive}
                 key={`cell-${j}`}
-                onClick={handleClick(i, j)}
+                onMouseDown={handleClick(i, j)}
+                onMouseEnter={handleHoverCell(i, j)}
               />
             ))}
           </Row>

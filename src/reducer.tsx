@@ -6,9 +6,9 @@ import { generateBoard } from './utilities';
 export const AppReducer: Reducer<AppState, Action> = (state, action) => {
   return produce(state, draft => {
     switch (action.type) {
-      case 'GROW':
+      case 'GROW': {
         draft.gen++;
-        const { board } = state;
+        const { board, cellOnHover } = state;
         board.forEach((row, i) => {
           row.forEach((cell, j) => {
             let count = 0;
@@ -36,27 +36,54 @@ export const AppReducer: Reducer<AppState, Action> = (state, action) => {
             }
           });
         });
-        for (let i = 0; i < board.length; i++) {
-          const row = board[i];
-          for (let j = 0; j < row.length; j++) {}
+        if (cellOnHover) {
+          const { i, j } = cellOnHover;
+          draft.board[i][j] = true;
         }
         break;
-      case 'PRESS':
+      }
+      case 'CLICK_CELL': {
         const { i, j } = action.payload.coord;
         draft.board[i][j] = !draft.board[i][j];
         break;
-      case 'START_STOP':
+      }
+      case 'PAINT_CELL': {
+        const { i, j } = action.payload.coord;
+        draft.board[i][j] = true;
+        break;
+      }
+      case 'START_STOP': {
         draft.growing = !draft.growing;
         break;
-      case 'RESTART':
+      }
+      case 'RESTART': {
         const { rows, cols, aliveProb } = state;
         draft.board = generateBoard(rows, cols, aliveProb);
         draft.growing = false;
         draft.gen = 0;
+
         break;
-      case 'ADJUST_PROB':
+      }
+      case 'ADJUST_PROB': {
         draft.aliveProb = action.payload.aliveProb;
         break;
+      }
+      case 'HOLD_MOUSE': {
+        draft.mousePressed = true;
+        break;
+      }
+      case 'RELEASE_MOUSE': {
+        draft.mousePressed = false;
+        break;
+      }
+      case 'ENTER_CELL': {
+        draft.cellOnHover = action.payload.coord;
+        break;
+      }
+      case 'LEAVE_BOARD': {
+        draft.cellOnHover = null;
+        break;
+      }
     }
   });
 };
@@ -76,6 +103,8 @@ export const initializer = ({
     growing: false,
     cols,
     rows,
-    aliveProb
+    aliveProb,
+    cellOnHover: null,
+    mousePressed: false
   };
 };
