@@ -7,7 +7,6 @@ export type AppState = {
   cols: number;
   rows: number;
   aliveProb: number;
-  cellOnHover: Coord | null;
   mousePressed: boolean;
 };
 

@@ -8,26 +8,25 @@ export const AppReducer: Reducer<AppState, Action> = (state, action) => {
     switch (action.type) {
       case 'GROW': {
         draft.gen++;
-        const { board, cellOnHover } = state;
+        const { board } = state;
         board.forEach((row, i) => {
           row.forEach((cell, j) => {
             let count = 0;
-            const dir = [-1, 0, 1];
-            dir.forEach(dirX =>
-              dir.forEach(dirY => {
+            for (let dirX = -1; dirX <= 1; dirX++) {
+              for (let dirY = -1; dirY <= 1; dirY++) {
                 if (
                   !(dirX === 0 && dirY === 0) &&
                   i + dirX >= 0 &&
                   i + dirX < board.length &&
                   j + dirY >= 0 &&
-                  j + dirY < row.length
+                  j + dirY < row.length &&
+                  board[i + dirX][j + dirY]
                 ) {
-                  if (!!board[i + dirX][j + dirY]) {
-                    count++;
-                  }
+                  count++;
                 }
-              })
-            );
+              }
+            }
+
             if (cell === false && count === 3) {
               draft.board[i][j] = true;
             }
@@ -36,10 +35,7 @@ export const AppReducer: Reducer<AppState, Action> = (state, action) => {
             }
           });
         });
-        if (cellOnHover) {
-          const { i, j } = cellOnHover;
-          draft.board[i][j] = true;
-        }
+
         break;
       }
       case 'CLICK_CELL': {
@@ -76,14 +72,14 @@ export const AppReducer: Reducer<AppState, Action> = (state, action) => {
         draft.mousePressed = false;
         break;
       }
-      case 'ENTER_CELL': {
-        draft.cellOnHover = action.payload.coord;
-        break;
-      }
-      case 'LEAVE_BOARD': {
-        draft.cellOnHover = null;
-        break;
-      }
+      // case 'ENTER_CELL': {
+      //   draft.cellOnHover = action.payload.coord;
+      //   break;
+      // }
+      // case 'LEAVE_BOARD': {
+      //   draft.cellOnHover = null;
+      //   break;
+      // }
     }
   });
 };
@@ -104,7 +100,7 @@ export const initializer = ({
     cols,
     rows,
     aliveProb,
-    cellOnHover: null,
+    // cellOnHover: null,
     mousePressed: false
   };
 };
