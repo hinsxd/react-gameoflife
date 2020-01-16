@@ -1,7 +1,7 @@
 import { Reducer } from 'react';
 import produce from 'immer';
 import { AppState, Action } from './types';
-import { generateBoard } from './utilities';
+import { generateBoard, isInRange } from './utilities';
 
 export const AppReducer: Reducer<AppState, Action> = (state, action) => {
   return produce(state, draft => {
@@ -16,10 +16,7 @@ export const AppReducer: Reducer<AppState, Action> = (state, action) => {
               for (let dirY = -1; dirY <= 1; dirY++) {
                 if (
                   !(dirX === 0 && dirY === 0) &&
-                  i + dirX >= 0 &&
-                  i + dirX < board.length &&
-                  j + dirY >= 0 &&
-                  j + dirY < row.length &&
+                  isInRange(board.length, row.length, i + dirX, j + dirY) &&
                   board[i + dirX][j + dirY]
                 ) {
                   count++;
@@ -92,7 +89,6 @@ export const initializer = ({
     cols,
     rows,
     density,
-    // cellOnHover: null,
     mousePressed: false
   };
 };

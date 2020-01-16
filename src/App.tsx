@@ -21,6 +21,10 @@ const App: React.FC = () => {
 
   const handleStartStop = () => dispatch({ type: 'START_STOP' });
 
+  const handleNextGen = () => {
+    if (!growing) dispatch({ type: 'GROW' });
+  };
+
   const handleClick = (i: number, j: number) => () => {
     dispatch({
       type: 'CLICK_CELL',
@@ -94,6 +98,7 @@ const App: React.FC = () => {
           {interval}ms
         </MenuItem>
         <MenuItem onClick={handleStartStop}>Start / Stop / Resume</MenuItem>
+        <MenuItem onClick={handleNextGen}>Next Generation</MenuItem>
         <MenuItem onClick={handleRestart}>Restart</MenuItem>
         <MenuItem>
           Density:{' '}
