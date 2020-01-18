@@ -8,7 +8,7 @@ export type AppState = {
   rows: number;
   density: number;
   lives: Coord[];
-  neibourCount: number[][];
+  neighbourCount: number[][];
 };
 
 export type Action =

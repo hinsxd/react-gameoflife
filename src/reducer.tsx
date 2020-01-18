@@ -1,7 +1,7 @@
 import { Reducer } from 'react';
 import produce from 'immer';
 import { AppState, Action } from './types';
-import { generateUniverse, isInRange } from './utilities';
+import { generateUniverse, isInRange, generateNeighbours } from './utilities';
 
 export const AppReducer: Reducer<AppState, Action> = (state, action) => {
   return produce(state, draft => {
@@ -12,17 +12,17 @@ export const AppReducer: Reducer<AppState, Action> = (state, action) => {
         universe.forEach((row, i) => {
           row.forEach((cell, j) => {
             let count = 0;
-            for (let dirX = -1; dirX <= 1; dirX++) {
-              for (let dirY = -1; dirY <= 1; dirY++) {
-                if (
-                  !(dirX === 0 && dirY === 0) &&
-                  isInRange(universe.length, row.length, i + dirX, j + dirY) &&
-                  universe[i + dirX][j + dirY]
-                ) {
-                  count++;
-                }
+            const neighbours = generateNeighbours(
+              universe.length,
+              universe[0].length,
+              i,
+              j
+            );
+            neighbours.forEach(neighbour => {
+              if (universe[neighbour.i][neighbour.j]) {
+                count++;
               }
-            }
+            });
 
             if (cell === false && count === 3) {
               draft.universe[i][j] = true;
@@ -84,6 +84,6 @@ export const initializer = ({
     rows,
     density,
     lives: [],
-    neibourCount: []
+    neighbourCount: []
   };
 };
