@@ -1,12 +1,14 @@
 export type Coord = { i: number; j: number };
 
 export type AppState = {
-  board: boolean[][];
+  universe: boolean[][];
   gen: number;
   growing: boolean;
   cols: number;
   rows: number;
   density: number;
+  lives: Coord[];
+  neibourCount: number[][];
 };
 
 export type Action =

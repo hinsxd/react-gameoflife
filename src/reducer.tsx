@@ -1,23 +1,23 @@
 import { Reducer } from 'react';
 import produce from 'immer';
 import { AppState, Action } from './types';
-import { generateBoard, isInRange } from './utilities';
+import { generateUniverse, isInRange } from './utilities';
 
 export const AppReducer: Reducer<AppState, Action> = (state, action) => {
   return produce(state, draft => {
     switch (action.type) {
       case 'GROW': {
         draft.gen++;
-        const { board } = state;
-        board.forEach((row, i) => {
+        const { universe } = state;
+        universe.forEach((row, i) => {
           row.forEach((cell, j) => {
             let count = 0;
             for (let dirX = -1; dirX <= 1; dirX++) {
               for (let dirY = -1; dirY <= 1; dirY++) {
                 if (
                   !(dirX === 0 && dirY === 0) &&
-                  isInRange(board.length, row.length, i + dirX, j + dirY) &&
-                  board[i + dirX][j + dirY]
+                  isInRange(universe.length, row.length, i + dirX, j + dirY) &&
+                  universe[i + dirX][j + dirY]
                 ) {
                   count++;
                 }
@@ -25,10 +25,10 @@ export const AppReducer: Reducer<AppState, Action> = (state, action) => {
             }
 
             if (cell === false && count === 3) {
-              draft.board[i][j] = true;
+              draft.universe[i][j] = true;
             }
             if (cell === true && (count >= 4 || count <= 1)) {
-              draft.board[i][j] = false;
+              draft.universe[i][j] = false;
             }
           });
         });
@@ -37,12 +37,12 @@ export const AppReducer: Reducer<AppState, Action> = (state, action) => {
       }
       case 'CLICK_CELL': {
         const { i, j } = action.payload.coord;
-        draft.board[i][j] = !draft.board[i][j];
+        draft.universe[i][j] = !draft.universe[i][j];
         break;
       }
       case 'PAINT_CELL': {
         const { i, j } = action.payload.coord;
-        draft.board[i][j] = true;
+        draft.universe[i][j] = true;
         break;
       }
       case 'START_STOP': {
@@ -51,7 +51,8 @@ export const AppReducer: Reducer<AppState, Action> = (state, action) => {
       }
       case 'RESTART': {
         const { rows, cols, density } = state;
-        draft.board = generateBoard(rows, cols, density);
+        const { universe } = generateUniverse(rows, cols, density);
+        draft.universe = universe;
         draft.growing = false;
         draft.gen = 0;
 
@@ -74,12 +75,15 @@ export const initializer = ({
   rows: number;
   density?: number;
 }): AppState => {
+  const { universe } = generateUniverse(rows, cols, density);
   return {
-    board: generateBoard(rows, cols, density),
+    universe,
     gen: 0,
     growing: false,
     cols,
     rows,
-    density
+    density,
+    lives: [],
+    neibourCount: []
   };
 };

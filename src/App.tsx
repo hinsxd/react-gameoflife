@@ -4,7 +4,7 @@ import { AppReducer, initializer } from './reducer';
 import { Cell, Grid, MenuItem, MenuWrapper, Row, Wrapper } from './components';
 
 const App: React.FC = () => {
-  const [{ board, gen, growing, density }, dispatch] = useReducer(
+  const [{ universe, gen, growing, density }, dispatch] = useReducer(
     AppReducer,
     { cols: 60, rows: 40 },
     initializer
@@ -71,7 +71,7 @@ const App: React.FC = () => {
         onMouseUp={handleMouseRelease}
         onMouseLeave={handleMouseLeave}
       >
-        {board.map((row, i) => (
+        {universe.map((row, i) => (
           <Row key={`row-${i}`}>
             {row.map((alive, j) => (
               <Cell
