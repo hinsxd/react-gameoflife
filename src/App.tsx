@@ -4,7 +4,7 @@ import { AppReducer, initializer } from './reducer';
 import { Cell, Grid, MenuItem, MenuWrapper, Row, Wrapper } from './components';
 
 const App: React.FC = () => {
-  const [{ board, gen, growing, density, mousePressed }, dispatch] = useReducer(
+  const [{ board, gen, growing, density }, dispatch] = useReducer(
     AppReducer,
     { cols: 60, rows: 40 },
     initializer
@@ -12,6 +12,7 @@ const App: React.FC = () => {
 
   const [interval, setInterval] = useState(100);
 
+  const [mousePressed, setMousePressed] = useState(false);
   useInterval(
     () => {
       dispatch({ type: 'GROW' });
@@ -55,10 +56,10 @@ const App: React.FC = () => {
   };
 
   const handleMouseHold = () => {
-    dispatch({ type: 'HOLD_MOUSE' });
+    setMousePressed(true);
   };
   const handleMouseRelease = () => {
-    dispatch({ type: 'RELEASE_MOUSE' });
+    setMousePressed(false);
   };
   const handleMouseLeave = () => {
     dispatch({ type: 'LEAVE_BOARD' });

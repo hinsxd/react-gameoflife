@@ -61,14 +61,6 @@ export const AppReducer: Reducer<AppState, Action> = (state, action) => {
         draft.density = action.payload.density;
         break;
       }
-      case 'HOLD_MOUSE': {
-        draft.mousePressed = true;
-        break;
-      }
-      case 'RELEASE_MOUSE': {
-        draft.mousePressed = false;
-        break;
-      }
     }
   });
 };
@@ -88,7 +80,6 @@ export const initializer = ({
     growing: false,
     cols,
     rows,
-    density,
-    mousePressed: false
+    density
   };
 };

@@ -7,7 +7,6 @@ export type AppState = {
   cols: number;
   rows: number;
   density: number;
-  mousePressed: boolean;
 };
 
 export type Action =
@@ -17,6 +16,4 @@ export type Action =
   | { type: 'PAINT_CELL'; payload: { coord: Coord } }
   | { type: 'RESTART' }
   | { type: 'ADJUST_DENSITY'; payload: { density: number } }
-  | { type: 'HOLD_MOUSE' }
-  | { type: 'RELEASE_MOUSE' }
   | { type: 'LEAVE_BOARD' };
